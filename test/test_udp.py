@@ -4,6 +4,7 @@ from systemrdl import RDLCompiler
 from systemrdl.messages import RDLCompileError
 from systemrdl import component as comp
 from systemrdl.udp import UDPDefinition
+from systemrdl import builtin_udps
 from systemrdl.rdltypes import NoValue, ArrayedType, RefType
 
 this_dir = os.path.dirname(os.path.realpath(__file__))
@@ -316,3 +317,48 @@ class TestUDP(RDLSourceTestCase):
         rdlc.register_udp(IntArrayUDP)
         rdlc.compile_file(os.path.join(this_dir, "rdl_src/udp_arrays.rdl"))
         root = rdlc.elaborate("top")
+
+    def test_anonymous_field(self):
+        root = self.compile(["rdl_src/udp_anonymous.rdl"], "top")
+
+        epid = root.find_by_path("top.EPID")
+        status = root.find_by_path("top.STATUS")
+        ctrl = root.find_by_path("top.CTRL")
+        multi = root.find_by_path("top.MULTI")
+
+        self.assertTrue(epid.fields()[0].is_anonymous)
+        self.assertEqual(epid.anonymous_field, epid.fields()[0])
+        self.assertEqual(status.anonymous_field, status.fields()[0])
+        self.assertFalse(ctrl.fields()[0].is_anonymous)
+        self.assertIsNone(ctrl.anonymous_field)
+        self.assertIsNone(multi.anonymous_field)
+        self.assertIs(multi.fields()[0].get_property('anonymous'), False)
+
+    def test_anonymous_field_undeclared(self):
+        # Soft UDP: not declared in the RDL, so it is implicitly never set
+        root = self.compile(["rdl_src/udp_anonymous_undeclared.rdl"], "top")
+        epid = root.find_by_path("top.EPID")
+        self.assertFalse(epid.fields()[0].is_anonymous)
+        self.assertIsNone(epid.anonymous_field)
+
+    def test_anonymous_field_implicit(self):
+        # Built-in UDP is usable without a declaration, including via dynamic assignment
+        root = self.compile(["rdl_src/udp_anonymous_implicit.rdl"], "top")
+        self.assertIsNotNone(root.find_by_path("top.epid").anonymous_field)
+        self.assertIsNotNone(root.find_by_path("top.other").anonymous_field)
+
+    def test_anonymous_field_errors(self):
+        self.assertRDLCompileError(
+            ["rdl_err_src/err_udp_anonymous.rdl"],
+            "err_anon_multi_field",
+            r"Field 'a' is marked as anonymous, but register 'r1' contains 2 fields"
+        )
+
+    def test_builtin_udp_declarations(self):
+        # Soft UDP registration errors if the RDL declaration differs from the
+        # Python definition, so this keeps the two in sync
+        rdlc = RDLCompiler()
+        rdlc.compile_file(builtin_udps.RDL_PATH)
+        rdlc.compile_file(os.path.join(this_dir, "rdl_src/udp_anonymous_undeclared.rdl"))
+        rdlc.elaborate("top")
+        self.assertIn("anonymous", rdlc.list_udps())

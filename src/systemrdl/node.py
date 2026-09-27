@@ -522,7 +522,7 @@ class Node:
                         props.append(k)
             if include_udp:
                 for k, v in self.env.property_rules.user_properties.items():
-                    if isinstance(v, ExternalUserProperty) and v.is_soft:
+                    if isinstance(v, ExternalUserProperty) and v.is_soft and not v.is_builtin:
                         continue
                     if type(self.inst) in v.bindable_to:
                         props.append(k)
@@ -1769,6 +1769,17 @@ class FieldNode(VectorNode):
         return self.parent.is_virtual
 
     @property
+    def is_anonymous(self) -> bool:
+        """
+        True if this field is marked with the ``anonymous`` property.
+
+        An anonymous field is the only field in its register. Exporters shall
+        not expose it as its own level of hierarchy, and instead refer to it
+        using the parent register's name.
+        """
+        return bool(self.get_property('anonymous'))
+
+    @property
     def is_volatile(self) -> bool:
         """
         True if combination of field access properties result in a field that
@@ -2243,6 +2254,18 @@ class RegNode(AddressableNode):
         # since mem components can only contain reg instances, a reg can only be
         # virtual if its direct parent is of type mem
         return isinstance(self.parent, MemNode)
+
+    @property
+    def anonymous_field(self) -> Optional['FieldNode']:
+        """
+        The register's anonymous field, or None if it does not have one.
+
+        See :attr:`FieldNode.is_anonymous`.
+        """
+        fields = self.fields()
+        if len(fields) == 1 and fields[0].is_anonymous:
+            return fields[0]
+        return None
 
     @property
     def has_sw_writable(self) -> bool:

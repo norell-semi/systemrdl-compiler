@@ -41,5 +41,8 @@ Tracker = "https://github.com/SystemRDL/systemrdl-compiler/issues"
 Changelog = "https://github.com/SystemRDL/systemrdl-compiler/releases"
 Documentation = "http://systemrdl-compiler.readthedocs.io"
 
+[tool.setuptools.package-data]
+systemrdl = ["builtin_udps.rdl"]
+
 [tool.setuptools.dynamic]
 version = {attr = "systemrdl.__about__.__version__"}

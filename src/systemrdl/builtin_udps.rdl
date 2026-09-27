@@ -1,0 +1,22 @@
+/*
+ * Property extensions built into the norell-semi SystemRDL toolchain.
+ *
+ * The norell-semi toolchain does not need these declarations. Compile this
+ * file prior to your other SystemRDL sources only when using other tools.
+ */
+
+/*
+ * Marks a field as anonymous. An anonymous field shall be the only field in
+ * its register. Exporters refer to it using the register's name, so that
+ * register EPID is exposed as "EPID" rather than "EPID.EPID" / "EPID__EPID".
+ *
+ * Usage:
+ *     reg {
+ *         field {sw=rw; hw=r; anonymous;} EPID[31:0] = 0;
+ *     } EPID;
+ */
+property anonymous {
+    type = boolean;
+    component = field;
+    default = true;
+};

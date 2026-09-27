@@ -1,0 +1,24 @@
+property anonymous {
+    component = field;
+    type = boolean;
+    default = true;
+};
+
+addrmap top {
+    reg {
+        field {sw=rw; hw=r; anonymous;} EPID[31:0] = 0;
+    } EPID @ 0x0;
+
+    reg {
+        field {sw=r; hw=w; anonymous;} value[15:0];
+    } STATUS @ 0x4;
+
+    reg {
+        field {sw=rw; hw=r; anonymous = false;} EN[0:0];
+    } CTRL @ 0x8;
+
+    reg {
+        field {sw=rw; hw=r;} a[7:0];
+        field {sw=rw; hw=r;} b[15:8];
+    } MULTI @ 0xC;
+};

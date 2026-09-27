@@ -35,7 +35,10 @@ class PropertyRuleBook:
             return self.rdl_properties[prop_name]
         elif prop_name in self.user_properties:
             udp = self.user_properties[prop_name]
-            if isinstance(udp, ExternalUserProperty) and udp.is_soft and not include_soft_udp:
+            if (
+                isinstance(udp, ExternalUserProperty) and udp.is_soft
+                and not udp.is_builtin and not include_soft_udp
+            ):
                 # Soft UDPs do not officially exist until they are explicitly defined
                 return None
             return udp

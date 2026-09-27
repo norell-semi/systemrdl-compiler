@@ -1,0 +1,10 @@
+addrmap top {
+    reg {
+        field {sw=rw; hw=r; anonymous;} _[11:0] = 0;
+    } epid;
+
+    reg {
+        field {sw=rw; hw=r;} a[7:0] = 0;
+    } other;
+    other.a -> anonymous = true;
+};

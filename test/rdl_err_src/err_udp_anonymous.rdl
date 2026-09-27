@@ -1,0 +1,12 @@
+property anonymous {
+    component = field;
+    type = boolean;
+    default = true;
+};
+
+addrmap err_anon_multi_field {
+    reg {
+        field {sw=rw; hw=r; anonymous;} a[7:0];
+        field {sw=rw; hw=r;} b[15:8];
+    } r1;
+};

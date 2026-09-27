@@ -18,6 +18,7 @@ from . import component as comp
 from . import walker
 from .node import RootNode
 from . import preprocessor
+from .builtin_udps import ALL_BUILTIN_UDPS
 
 if TYPE_CHECKING:
     from .rdltypes.typing import RDLValue
@@ -110,6 +111,12 @@ class RDLCompiler:
         self.namespace: NamespaceRegistry = NamespaceRegistry(self.env)
         self.visitor: RootVisitor = RootVisitor(self, comp.Root())
         self.root = self.visitor.component
+
+        for udp_cls in ALL_BUILTIN_UDPS:
+            self.register_udp(udp_cls, soft=True)
+            udp = self.env.property_rules.user_properties[udp_cls.name]
+            assert isinstance(udp, ExternalUserProperty)
+            udp.is_builtin = True
 
 
     def register_udp(self, definition_cls: 'Type[UDPDefinition]', soft: bool=True) -> None:

@@ -154,6 +154,10 @@ class ExternalUserProperty(UserProperty):
         self.definition = definition_cls(env)
         self.is_soft = soft
 
+        # Built-in UDPs are usable without being declared, but remain soft so
+        # that a matching declaration in the RDL source is still accepted
+        self.is_builtin = False
+
     @property
     def name(self) -> str:
         return self.definition.name
